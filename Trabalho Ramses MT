@@ -1,0 +1,95 @@
+; Maria Torres Loureiro
+
+ORG 192
+src: DB 0
+dst: DB 0
+passo: DB 0
+op: DB 0
+
+
+ORG 0
+LDR b src			;	carrega src no registrador b
+LDR x dst			;	carrega src no registrador x
+
+
+zera:
+LDR a dst, I		;	carrega conteúdo do endereço sendo apontado pelo dst
+JZ inicio			;	se for 0, pula para o inicio
+SUB a dst, I		;	se não, subtrai o próprio número
+STR a dst, I		;	guarda o 0 no endereõ sendo apontado pelo dst
+LDR a dst			;	carrega dst
+ADD a #1			;	adiciona um
+STR a dst			;	guarda em dst
+JMP zera			;	pula para o início do loop
+
+
+inicio:
+STR x dst			;	guarda conteúdo do registrador x em dst
+LDR a op         	;	carrega op
+JZ cifragem			;	se op é zero, é cifragem
+JMP decifragem		;	se op não é zero, é decifragem
+
+cifragem:
+LDR a src, I		;	carrega conteúdo do endereço sendo apontado pelo src
+JZ cabou			;	se for \0, acabou a string
+ADD a passo			;	adiciona o passo
+STR a dst, I		;	guarda no endereço sendo apontado pelo dst
+SUB a #91			;	subtrai 90 
+JN prox				;	se resultado é negativo, valor cifrdo não passou de 89
+LDR a dst, I		;	se resultado foi maior ou igual a 0, carrega dst
+SUB a #26			;	subtrai 26
+STR a dst, I		;	guarda no endereço sendo apontado pelo dst
+prox:
+LDR a src			;	carrega o conteúdo de src (endereço do inicio da string)
+ADD a #1			;	adiciona 1 (src agora aponta para a segunda casa da string)
+STR a src			;	guarda em dst
+LDR a dst			;	carrega o conteúdo de dst(endereço do inicio da string destino)
+ADD a #1			;	adiciona 1 (dst agora aponta para a segunda casa da string destino)
+STR a dst			;	guarda em dst
+JMP cifragem
+
+
+
+
+decifragem:
+LDR a src, I		;	carrega conteúdo do endereço sendo apontado pelo src
+JZ cabou			;	se for \0, acabou a string
+SUB a passo			;	subtrai o passo
+STR a dst, I		;	guarda no endereço sendo apontado por dst
+SUB a #66			;	subtrai 65 
+JN nega				;	se resultado é negativo, deve somar valor com 26
+JMP deu_bom
+nega:
+LDR a dst, I		;	se resultado foi negativo, carrega dst
+ADD a #26			;	soma 26
+STR a dst, I		;	guarda em dst
+deu_bom:
+LDR a src			;	carrega o conteúdo de src (endereço do inicio da string)
+ADD a #1			;	adiciona 1 (src agora aponta para a segunda casa da string)
+STR a src			;	guarda no endereço sendo apontado pelo src
+LDR a dst			;	carrega o conteúdo de dst(endereço do inicio da string destino)
+ADD a #1			;	adiciona 1 (dst agora aponta para a segunda casa da string destino)
+STR a dst			;	guarda em dst
+JMP decifragem
+
+
+
+cabou:
+STR b src			;	guarda conteúdo do registrador b em src
+
+
+zera_2:
+LDR a src, I		;	carrega conteúdo do enredeço sendo apontado pelo src
+JZ fim				;	se for 0, pula para fim
+SUB a src, I		;	subtrai o conteúdo do endereço sendo apontado pelo src
+STR a src, I		;	guarda no endereço sendo apontado pelo src
+LDR a src			;	carrega src
+ADD a #1			;	adiciona 1
+STR a src			;	guarda em src
+JMP zera_2			;	pula para o início do loop
+
+
+fim:
+STR b src			;	guarda o conteúdo do registrador b em src
+STR x dst			;	guarda o conteúdo do registrador x em dst
+HLT
